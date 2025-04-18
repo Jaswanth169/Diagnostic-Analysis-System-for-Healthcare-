@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DN Ninjas Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- Google Fonts for a modern look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <style>
+    /* Animated gradient background */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(135deg, #004a88, #a7122a);
+      background-size: 200% 200%;
+      animation: gradientBG 10s ease infinite;
+      min-height: 100vh;
+      overflow: auto;
+      cursor: none;
+    }
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    /* Sidebar styling */
+    .sidebar {
+      width: 250px;
+      background: rgba(0, 40, 70, 0.95);
+      color: #fff;
+      padding: 1.5rem;
+      position: fixed;
+      height: 100%;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    .sidebar h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: 2px;
+    }
+    .sidebar a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      margin: 1rem 0;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    .sidebar a:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    /* Main content styling */
+    .main-content {
+      margin-left: 250px;
+      padding: 2rem;
+      width: calc(100% - 250px);
+      overflow-y: auto;
+    }
+    .dashboard-header {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      color: #fff;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+    }
+    
+    /* Glass card for query form */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      backdrop-filter: blur(15px);
+      padding: 2.5rem;
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.3s;
+      margin-bottom: 2rem;
+    }
+    .glass-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    /* Form styling */
+    .form-label {
+      font-weight: 600;
+      color: #fff;
+    }
+    .form-control, .form-control-file {
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 10px;
+      padding: 0.75rem;
+    }
+    .btn-custom {
+      background-color: #004a88;
+      color: #fff;
+      font-size: 1.1rem;
+      padding: 0.75rem 2rem;
+      border: none;
+      border-radius: 50px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    .btn-custom:hover {
+      background-color: #a7122a;
+      transform: scale(1.03);
+    }
+    
+    /* Markdown-like output area */
+    .output-area {
+      background: rgba(255, 255, 255, 0.85);
+      color: #333;
+      font-family: 'Courier New', monospace;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      margin-top: 1.5rem;
+      white-space: pre-wrap;
+    }
+    
+    /* Custom neon cursor */
+    #custom-cursor, #custom-cursor-trail {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10000;
+    }
+    #custom-cursor {
+      width: 8px;
+      height: 8px;
+      background: #00ffff;
+      box-shadow: 0 0 10px rgba(0,255,255,0.9), 0 0 20px rgba(0,255,255,0.8), 0 0 30px rgba(0,255,255,0.7);
+    }
+    #custom-cursor-trail {
+      width: 20px;
+      height: 20px;
+      background: #00ffff;
+      opacity: 0.5;
+      filter: blur(4px);
+      box-shadow: 0 0 15px rgba(0,255,255,0.7), 0 0 30px rgba(0,255,255,0.6);
+    }
+    
+    /* Loading Overlay with Cat Animation */
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 11000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    /* Cat GIF is scaled down to 150x150 for a subtle overlay */
+    #loading-overlay img {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+  <!-- Custom Neon Cursor Elements -->
+  <div id="custom-cursor"></div>
+  <div id="custom-cursor-trail"></div>
+  
+  <!-- Loading Overlay with Cat Animation -->
+  <div id="loading-overlay">
+    <img id="cat-image" src="{{ url_for('static', filename='output.gif') }}" alt="Cat Animation">
+  </div>
+  
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2>DN Ninjas</h2>
+    <a href="#">Dashboard</a>
+    <a href="{{ url_for('index') }}">Health Query</a>
+    <a href="#">Reports</a>
+    <a href="#">Settings</a>
+    <a href="#">Help</a>
+  </div>
+  
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <div class="dashboard-header">Welcome to DN Ninjas Dashboard</div>
+    
+    <!-- Error and Result Output -->
+    {% if error %}
+      <div class="alert alert-danger" role="alert">
+        {{ error }}
+      </div>
+    {% endif %}
+    {% if result %}
+      <div class="output-area">
+        {{ result }}
+      </div>
+    {% endif %}
+    
+    <!-- Glass Card for Query Form -->
+    <div class="glass-card">
+      <form id="queryForm" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="query_text" class="form-label">Enter your query:</label>
+          <textarea class="form-control" id="query_text" name="query_text" rows="3" placeholder="Type your question here..."></textarea>
+        </div>
+        <div class="mb-3">
+          <label for="location" class="form-label">Enter your location:</label>
+          <input type="text" class="form-control" id="location" name="location" placeholder="City, Country">
+        </div>
+        <div class="mb-3">
+          <label for="image" class="form-label">Upload an image (optional):</label>
+          <input type="file" class="form-control" id="image" name="image">
+        </div>
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-custom">Submit Query</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Custom JavaScript for Neon Cursor, Automatic Geolocation, and Loading Overlay -->
+  <script>
+    // Neon Cursor Animation
+    const customCursor = document.getElementById("custom-cursor");
+    const customCursorTrail = document.getElementById("custom-cursor-trail");
+    let trailX = 0, trailY = 0;
+    let targetX = 0, targetY = 0;
+    
+    document.addEventListener("mousemove", (e) => {
+      customCursor.style.left = e.pageX + "px";
+      customCursor.style.top = e.pageY + "px";
+      targetX = e.pageX;
+      targetY = e.pageY;
+    });
+    
+    function animateTrail() {
+      trailX += (targetX - trailX) * 0.15;
+      trailY += (targetY - trailY) * 0.15;
+      customCursorTrail.style.left = trailX + "px";
+      customCursorTrail.style.top = trailY + "px";
+      requestAnimationFrame(animateTrail);
+    }
+    animateTrail();
+    
+    // Automatic Geolocation: Ask for user's location on page load and prefill the location field.
+    function setUserLocation(position) {
+      const { latitude, longitude } = position.coords;
+      const locString = `Lat: ${latitude.toFixed(2)}, Lon: ${longitude.toFixed(2)}`;
+      document.getElementById("location").value = locString;
+    }
+    
+    function locationError(err) {
+      console.error('Error retrieving location', err);
+    }
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(setUserLocation, locationError);
+    }
+    
+    // Loading Overlay Handling: Show overlay on form submission, hide when results load.
+    const queryForm = document.getElementById("queryForm");
+    const loadingOverlay = document.getElementById("loading-overlay");
+    
+    queryForm.addEventListener("submit", function() {
+      loadingOverlay.style.display = "flex";
+    });
+    
+    window.addEventListener("load", function() {
+      // Hide overlay after a slight delay for smooth transition.
+      setTimeout(function(){
+        loadingOverlay.style.display = "none";
+      }, 500);
+    });
+  </script>
+</body>
+</html>
